@@ -29,6 +29,7 @@ private:
   std::shared_ptr<libcamera::Camera> camera;
   std::shared_ptr<libcamera::FrameBufferAllocator> allocator;
   std::vector<std::unique_ptr<libcamera::Request>> requests;
+  libcamera::Stream *stream;
 
   // parameters that are to be set for every request
   std::unordered_map<unsigned int, libcamera::ControlValue> parameters;
@@ -131,7 +132,7 @@ CameraNode::CameraNode()
     cname.begin(), cname.end(), [](const char &x) { return !std::isalnum(x); }, '_');
 
   // allocate stream buffers and create one request per buffer
-  libcamera::Stream *stream = scfg.stream();
+  stream = scfg.stream();
 
   allocator = std::make_shared<libcamera::FrameBufferAllocator>(camera);
   allocator->allocate(stream);
@@ -161,11 +162,15 @@ CameraNode::CameraNode()
 CameraNode::~CameraNode()
 {
   camera->requestCompleted.disconnect();
+  std::this_thread::sleep_for(500ms);
   std::cout << "stopping ..." << std::endl;
   if (camera->stop())
     std::cerr << "failed to stop camera" << std::endl;
   std::cout << "... stopped." << std::endl;
+  allocator->free(stream);
+  allocator.reset();
   camera->release();
+  camera.reset();
   camera_manager.stop();
 }
 
