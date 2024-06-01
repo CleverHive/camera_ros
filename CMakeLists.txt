@@ -31,11 +31,9 @@ find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(libcamera REQUIRED libcamera)
 
-find_package(OpenCV REQUIRED)
-
 add_executable(camera_test CameraNode.cpp)
 
-target_include_directories(camera_test PUBLIC ${libcamera_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(camera_test ${libcamera_LINK_LIBRARIES} ${OpenCV_LIBS})
+target_include_directories(camera_test PUBLIC ${libcamera_INCLUDE_DIRS})
+target_link_libraries(camera_test ${libcamera_LINK_LIBRARIES})
 
 install(TARGETS camera_test DESTINATION bin)
